@@ -53,6 +53,8 @@ python-socketio==5.10.0
 
 # Validation
 marshmallow==3.20.1
+pydantic==2.5.0
+pydantic-settings==2.1.0
 
 # Testing
 pytest==7.4.3
