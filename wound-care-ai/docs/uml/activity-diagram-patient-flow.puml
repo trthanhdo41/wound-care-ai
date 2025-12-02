@@ -1,0 +1,106 @@
+@startuml Wound Care AI - Patient Workflow Activity Diagram
+
+start
+
+:Patient opens application;
+
+if (Already logged in?) then (yes)
+  :Navigate to Dashboard;
+else (no)
+  :Show Login page;
+  
+  if (Login method?) then (Email/Password)
+    :Enter credentials;
+    :Submit login form;
+  else (Google OAuth)
+    :Click "Continue with Google";
+    :Redirect to Google;
+    :Authorize application;
+    :Redirect back with tokens;
+  endif
+  
+  :Save JWT token;
+  :Fetch user profile;
+  :Navigate to Dashboard;
+endif
+
+:View Dashboard Overview;
+
+partition "Wound Analysis Flow" {
+  :Click "Upload Image";
+  :Select wound image from device;
+  :Preview image;
+  :Click "Analyze";
+  
+  fork
+    :Upload image to backend;
+  fork again
+    :Show loading indicator;
+  end fork
+  
+  :Backend processes image;
+  
+  fork
+    :Segmentation (SegFormer);
+  fork again
+    :Grad-CAM generation;
+  fork again
+    :Color classification (K-Means);
+  fork again
+    :Risk assessment (K-Means);
+  fork again
+    :Generate care guidelines;
+  end fork
+  
+  :Receive analysis results;
+  
+  :Display results:
+  - Segmentation overlay
+  - Grad-CAM heatmap
+  - Wound area
+  - Tissue composition chart
+  - Risk assessment card
+  - Care guidelines;
+  
+  if (Save to history?) then (yes)
+    :Analysis saved to database;
+  endif
+}
+
+partition "View History" {
+  :Click "History" tab;
+  :Load past analyses;
+  :Display analysis list;
+  
+  if (View details?) then (yes)
+    :Click on analysis;
+    :Show full analysis details;
+  endif
+}
+
+partition "Chat with AI" {
+  :Click "Chat" button;
+  :Open chat window;
+  :Type question about wound care;
+  :Send message;
+  :AI generates response;
+  :Display response;
+  
+  if (Upload image in chat?) then (yes)
+    :Select image;
+    :Upload to ImgBB;
+    :Send image URL in message;
+  endif
+}
+
+partition "Export Report" {
+  :Click "Export PDF";
+  :Backend generates PDF report;
+  :Download PDF file;
+}
+
+:Logout (optional);
+
+stop
+
+@enduml

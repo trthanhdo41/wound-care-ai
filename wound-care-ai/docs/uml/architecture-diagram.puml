@@ -1,0 +1,129 @@
+@startuml Wound Care AI - System Architecture
+
+!define RECTANGLE class
+
+skinparam componentStyle rectangle
+
+package "Frontend (React)" {
+  [Landing Page] as Landing
+  [Login/Register] as Auth
+  [Patient Dashboard] as PatientDash
+  [Doctor Dashboard] as DoctorDash
+  [Admin Dashboard] as AdminDash
+  [Chat Window] as Chat
+  [Analysis Charts] as Charts
+  
+  package "Context" {
+    [AuthContext] as AuthCtx
+    [ToastContext] as ToastCtx
+  }
+}
+
+package "Backend (Flask)" {
+  package "Routes/Controllers" {
+    [Auth Routes] as AuthRoutes
+    [Analysis Routes] as AnalysisRoutes
+    [Chat Routes] as ChatRoutes
+    [Doctor Routes] as DoctorRoutes
+    [Patient Routes] as PatientRoutes
+    [Admin Routes] as AdminRoutes
+    [PDF Export Routes] as PDFRoutes
+  }
+  
+  package "AI Pipeline" {
+    [Wound Analyzer] as Analyzer
+    [SegFormer Model] as SegFormer
+    [Risk Assessment\n(K-Means)] as RiskModel
+    [Color Classification\n(K-Means)] as ColorModel
+  }
+  
+  package "Services" {
+    [JWT Handler] as JWT
+    [Image Processing] as ImageProc
+    [Care Guidelines\nGenerator] as Guidelines
+  }
+}
+
+package "External Services" {
+  [Google OAuth] as GoogleAuth
+  [ImgBB API] as ImgBB
+}
+
+database "MySQL Database" {
+  [Users] as UsersDB
+  [Patients] as PatientsDB
+  [Doctors] as DoctorsDB
+  [Wound Analyses] as AnalysesDB
+  [Conversations] as ConversationsDB
+  [Messages] as MessagesDB
+}
+
+cloud "AI Models Storage" {
+  file "SegFormer\nWeights" as ModelFile
+  file "Risk K-Means\nClusters" as RiskFile
+  file "Color K-Means\nClusters" as ColorFile
+}
+
+' Frontend connections
+Landing --> Auth
+Auth --> PatientDash
+Auth --> DoctorDash
+Auth --> AdminDash
+PatientDash --> Charts
+PatientDash --> Chat
+DoctorDash --> Chat
+
+' Frontend to Backend
+Auth --> AuthRoutes : HTTP/REST
+PatientDash --> AnalysisRoutes : HTTP/REST
+PatientDash --> ChatRoutes : HTTP/REST
+DoctorDash --> DoctorRoutes : HTTP/REST
+DoctorDash --> PatientRoutes : HTTP/REST
+AdminDash --> AdminRoutes : HTTP/REST
+Charts --> PDFRoutes : HTTP/REST
+
+' Backend internal
+AuthRoutes --> JWT
+AuthRoutes --> GoogleAuth : OAuth 2.0
+AnalysisRoutes --> Analyzer
+Analyzer --> SegFormer
+Analyzer --> RiskModel
+Analyzer --> ColorModel
+Analyzer --> ImageProc
+Analyzer --> Guidelines
+ChatRoutes --> ImgBB : Image Upload
+
+' Backend to Database
+AuthRoutes --> UsersDB
+AuthRoutes --> PatientsDB
+AuthRoutes --> DoctorsDB
+AnalysisRoutes --> AnalysesDB
+ChatRoutes --> ConversationsDB
+ChatRoutes --> MessagesDB
+DoctorRoutes --> PatientsDB
+DoctorRoutes --> AnalysesDB
+
+' AI Models loading
+SegFormer ..> ModelFile : Load
+RiskModel ..> RiskFile : Load
+ColorModel ..> ColorFile : Load
+
+note right of SegFormer
+  Deep Learning Model
+  for Wound Segmentation
+  and Grad-CAM visualization
+end note
+
+note right of RiskModel
+  K-Means Clustering
+  for Risk Assessment
+  (Low, Medium, High)
+end note
+
+note right of ColorModel
+  K-Means Clustering
+  for Tissue Classification
+  (Red, Yellow, Dark)
+end note
+
+@enduml

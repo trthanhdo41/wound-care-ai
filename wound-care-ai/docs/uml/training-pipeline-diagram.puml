@@ -1,0 +1,108 @@
+@startuml Model Training Pipeline
+
+start
+
+:Load Dataset;
+note right
+  Diabetic Foot Ulcer Images
+  + Segmentation Masks
+end note
+
+partition "Data Preprocessing" {
+  :Resize images to 512x512;
+  :Normalize pixel values;
+  
+  if (Use Augmentation?) then (yes)
+    :Apply Data Augmentation:
+    - Random rotation
+    - Horizontal/Vertical flip
+    - Random scale
+    - Color jittering
+    - Brightness/Contrast adjustment;
+  else (no)
+    :Use original images only;
+  endif
+  
+  :Split into Train/Val/Test;
+}
+
+partition "Model Selection" {
+  :Choose Architecture;
+  
+  split
+    :DeepLabV3;
+  split again
+    :U-Net;
+  split again
+    :SegFormer;
+  split again
+    :Fork SegFormer;
+  end split
+}
+
+partition "Training Configuration" {
+  :Set Hyperparameters:
+  - Learning rate
+  - Batch size
+  - Epochs
+  - Optimizer (Adam/SGD)
+  - Loss function (BCE/Dice);
+  
+  :Initialize Model;
+  :Load Pretrained Weights (optional);
+}
+
+partition "Training Loop" {
+  repeat
+    :Forward Pass;
+    :Calculate Loss;
+    :Backward Pass;
+    :Update Weights;
+    
+    if (Validation Step?) then (yes)
+      :Evaluate on Validation Set;
+      :Calculate Metrics:
+      - IoU Score
+      - Dice Coefficient
+      - Pixel Accuracy;
+      
+      if (Best Model?) then (yes)
+        :Save Model Checkpoint;
+      endif
+    endif
+    
+  repeat while (More Epochs?) is (yes)
+  ->no;
+}
+
+partition "Model Evaluation" {
+  :Load Best Checkpoint;
+  :Test on Test Set;
+  :Calculate Final Metrics;
+  :Generate Predictions;
+  :Visualize Results;
+}
+
+partition "Model Comparison" {
+  :Compare All Models:
+  | Model | IoU | Dice | Accuracy | Speed |
+  |-------|-----|------|----------|-------|
+  | DeepLabV3 Aug | 0.82 | 0.89 | 94% | Medium |
+  | DeepLabV3 NoArg | 0.79 | 0.87 | 92% | Medium |
+  | U-Net | 0.80 | 0.88 | 93% | Fast |
+  | SegFormer | 0.85 | 0.91 | 95% | Fast |
+  | Fork SegFormer | 0.83 | 0.90 | 94% | Medium |;
+  
+  :Select Best Model;
+}
+
+:Export Model for Production;
+note right
+  Selected: SegFormer
+  Format: .pth (PyTorch)
+  Size: ~100MB
+end note
+
+stop
+
+@enduml

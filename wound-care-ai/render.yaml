@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: wound-care-backend
+    runtime: python
+    region: singapore
+    plan: free
+    branch: main
+    rootDir: wound-care-ai/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: MODEL_PATH
+        value: model_files/segformer_wound.pth
+      - key: DATASET_PATH
+        value: ../../Model/wound_features_with_risk.csv
+      - key: COLOR_DATASET_PATH
+        value: ../../Model/color_features_ulcer_red_yellow_dark.csv
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FE_URL
+        value: https://wound-care-ai.vercel.app
+      - key: DATABASE_URL
+        fromDatabase:
+          name: wound-care-db
+          property: connectionString
+
+databases:
+  - name: wound-care-db
+    databaseName: wound_care_ai
+    user: wound_user
+    plan: free
+    region: singapore

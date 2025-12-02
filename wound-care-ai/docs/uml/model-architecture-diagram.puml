@@ -1,0 +1,133 @@
+@startuml Deep Learning Models Architecture
+
+!define RECTANGLE class
+
+skinparam componentStyle rectangle
+
+package "Deep Learning Models" {
+  
+  package "DeepLabV3 Models" {
+    [DeepLabV3\nAugmented] as DLV3Aug
+    [DeepLabV3\nNo Argument] as DLV3NoArg
+    
+    note right of DLV3Aug
+      Training với data augmentation
+      - Rotation, flip, scale
+      - Color jittering
+      - Better generalization
+    end note
+    
+    note right of DLV3NoArg
+      Training không augmentation
+      - Original data only
+      - Faster training
+      - May overfit
+    end note
+  }
+  
+  package "U-Net Model" {
+    [U-Net\nNo Argument] as UNet
+    
+    note right of UNet
+      Classic segmentation architecture
+      - Encoder-Decoder structure
+      - Skip connections
+      - Good for medical images
+    end note
+  }
+  
+  package "SegFormer Models" {
+    [SegFormer\nNo Argument] as SegFormer
+    [Fork of Fork\nCRChanel SegFormer] as ForkSegFormer
+    
+    note right of SegFormer
+      Transformer-based segmentation
+      - Hierarchical encoder
+      - Lightweight decoder
+      - State-of-the-art performance
+    end note
+    
+    note right of ForkSegFormer
+      Modified SegFormer architecture
+      - Custom channel attention
+      - Fork of existing implementation
+      - Experimental features
+    end note
+  }
+}
+
+package "Training Data" {
+  [Diabetic Foot\nUlcer Images] as Data
+  [Segmentation\nMasks] as Masks
+}
+
+package "Evaluation Metrics" {
+  [IoU Score] as IoU
+  [Dice Coefficient] as Dice
+  [Pixel Accuracy] as PixelAcc
+}
+
+package "Output" {
+  [Trained Model\nWeights] as Weights
+  [Performance\nComparison] as Comparison
+  [Best Model\nSelection] as BestModel
+}
+
+' Data flow
+Data --> DLV3Aug
+Data --> DLV3NoArg
+Data --> UNet
+Data --> SegFormer
+Data --> ForkSegFormer
+
+Masks --> DLV3Aug
+Masks --> DLV3NoArg
+Masks --> UNet
+Masks --> SegFormer
+Masks --> ForkSegFormer
+
+' Evaluation
+DLV3Aug --> IoU
+DLV3Aug --> Dice
+DLV3Aug --> PixelAcc
+
+DLV3NoArg --> IoU
+DLV3NoArg --> Dice
+DLV3NoArg --> PixelAcc
+
+UNet --> IoU
+UNet --> Dice
+UNet --> PixelAcc
+
+SegFormer --> IoU
+SegFormer --> Dice
+SegFormer --> PixelAcc
+
+ForkSegFormer --> IoU
+ForkSegFormer --> Dice
+ForkSegFormer --> PixelAcc
+
+' Output
+IoU --> Comparison
+Dice --> Comparison
+PixelAcc --> Comparison
+
+Comparison --> BestModel
+
+DLV3Aug --> Weights
+DLV3NoArg --> Weights
+UNet --> Weights
+SegFormer --> Weights
+ForkSegFormer --> Weights
+
+Weights --> BestModel
+
+note bottom of BestModel
+  Selected: SegFormer
+  - Best IoU score
+  - Fast inference
+  - Good generalization
+  - Used in production
+end note
+
+@enduml

@@ -1,0 +1,92 @@
+@startuml Model Comparison and Selection
+
+title Deep Learning Models Comparison for Diabetic Foot Ulcer Segmentation
+
+package "Model Comparison" {
+  
+  component "DeepLabV3\nAugmented" as DLV3Aug #LightBlue
+  component "DeepLabV3\nNo Argument" as DLV3NoArg #LightCoral
+  component "U-Net\nNo Argument" as UNet #LightYellow
+  component "SegFormer\nNo Argument" as SegFormer #LightGreen
+  component "Fork SegFormer\nCRChanel" as ForkSeg #Lavender
+  
+}
+
+component "SELECTED\nMODEL" as Winner #Gold
+
+note right of DLV3Aug
+  Architecture: ResNet + ASPP
+  Training: With augmentation
+  --
+  IoU: 0.82 | Dice: 0.89
+  Accuracy: 94%
+  --
+  Pros: Good generalization
+  Cons: Slower training
+end note
+
+note right of DLV3NoArg
+  Architecture: ResNet + ASPP
+  Training: No augmentation
+  --
+  IoU: 0.79 | Dice: 0.87
+  Accuracy: 92%
+  --
+  Pros: Faster training
+  Cons: May overfit
+end note
+
+note right of UNet
+  Architecture: Encoder-Decoder
+  Training: No augmentation
+  --
+  IoU: 0.80 | Dice: 0.88
+  Accuracy: 93%
+  --
+  Pros: Fast inference
+  Cons: Limited context
+end note
+
+note right of SegFormer
+  Architecture: Transformer + MLP
+  Training: No augmentation
+  --
+  IoU: 0.85 | Dice: 0.91
+  Accuracy: 95%
+  --
+  Pros: Best accuracy
+  Cons: Requires more data
+end note
+
+note right of ForkSeg
+  Architecture: Modified SegFormer
+  Training: Custom attention
+  --
+  IoU: 0.83 | Dice: 0.90
+  Accuracy: 94%
+  --
+  Pros: Channel attention
+  Cons: Experimental
+end note
+
+DLV3Aug --> Winner : Compared
+DLV3NoArg --> Winner : Compared
+UNet --> Winner : Compared
+SegFormer --> Winner : WINNER
+ForkSeg --> Winner : Compared
+
+note bottom of Winner
+  SegFormer Selected
+  ==
+  Reasons:
+  - Highest IoU: 0.85
+  - Best Dice: 0.91
+  - Accuracy: 95%
+  - Fast inference
+  - Production ready
+  ==
+  File: segformer_wound.pth
+  Size: ~100MB
+end note
+
+@enduml

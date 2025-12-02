@@ -1,0 +1,124 @@
+@startuml Wound Care AI - Class Diagram
+
+skinparam classAttributeIconSize 0
+
+class User {
+  + id: Integer
+  + email: String
+  + password_hash: String
+  + full_name: String
+  + role: Enum(patient, doctor, admin)
+  + phone: String
+  + avatar_url: String
+  + is_active: Boolean
+  + created_at: DateTime
+  + updated_at: DateTime
+  --
+  + set_password(password)
+  + check_password(password)
+  + to_dict()
+}
+
+class Patient {
+  + id: Integer
+  + user_id: Integer
+  + date_of_birth: Date
+  + gender: String
+  + address: String
+  + diabetes_type: String
+  + medical_history: Text
+  + created_at: DateTime
+  --
+  + to_dict()
+}
+
+class Doctor {
+  + id: Integer
+  + user_id: Integer
+  + specialization: String
+  + license_number: String
+  + years_of_experience: Integer
+  + hospital_affiliation: String
+  + created_at: DateTime
+  --
+  + to_dict()
+}
+
+class WoundAnalysis {
+  + id: Integer
+  + patient_id: Integer
+  + image_path: String
+  + segmentation_mask_path: String
+  + gradcam_path: String
+  + wound_area: Float
+  + tissue_red_percent: Float
+  + tissue_yellow_percent: Float
+  + tissue_dark_percent: Float
+  + risk_level: Enum(low, medium, high)
+  + risk_score: Float
+  + care_guidelines: Text
+  + notes: Text
+  + created_at: DateTime
+  --
+  + to_dict()
+}
+
+class Conversation {
+  + id: Integer
+  + patient_id: Integer
+  + doctor_id: Integer
+  + title: String
+  + created_at: DateTime
+  + updated_at: DateTime
+  --
+  + to_dict()
+}
+
+class Message {
+  + id: Integer
+  + conversation_id: Integer
+  + sender_id: Integer
+  + sender_type: Enum(patient, doctor, ai)
+  + content: Text
+  + image_url: String
+  + created_at: DateTime
+  --
+  + to_dict()
+}
+
+' Relationships
+User "1" -- "0..1" Patient : has >
+User "1" -- "0..1" Doctor : has >
+Patient "1" -- "0..*" WoundAnalysis : has >
+Patient "1" -- "0..*" Conversation : initiates >
+Doctor "1" -- "0..*" Conversation : responds >
+Conversation "1" -- "0..*" Message : contains >
+
+' AI Models (not in database)
+class SegFormerModel <<AI Model>> {
+  + model_path: String
+  + device: String
+  --
+  + segment_wound(image)
+  + generate_gradcam(image)
+}
+
+class RiskAssessmentModel <<AI Model>> {
+  + kmeans_model: KMeans
+  + cluster_mapping: Dict
+  --
+  + predict_risk(features)
+}
+
+class ColorClassificationModel <<AI Model>> {
+  + cluster_centers: Array
+  + cluster_mapping: Dict
+  --
+  + classify_tissue_colors(image, mask)
+}
+
+WoundAnalysis ..> SegFormerModel : uses
+WoundAnalysis ..> RiskAssessmentModel : uses
+WoundAnalysis ..> ColorClassificationModel : uses
+
+@enduml

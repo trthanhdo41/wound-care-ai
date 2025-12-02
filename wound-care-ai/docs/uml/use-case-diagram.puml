@@ -1,0 +1,76 @@
+@startuml Wound Care AI - Use Case Diagram
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor Patient as patient
+actor Doctor as doctor
+actor Admin as admin
+
+rectangle "Wound Care AI System" {
+  ' Patient Use Cases
+  usecase "Register/Login" as UC1
+  usecase "Login with Google" as UC2
+  usecase "Upload Wound Image" as UC3
+  usecase "View Analysis Results" as UC4
+  usecase "View Risk Assessment" as UC5
+  usecase "View Care Guidelines" as UC6
+  usecase "Chat with AI Assistant" as UC7
+  usecase "View Analysis History" as UC8
+  usecase "Export Report (PDF)" as UC9
+  usecase "Update Profile" as UC10
+  
+  ' Doctor Use Cases
+  usecase "View Patient List" as UC11
+  usecase "View Patient Details" as UC12
+  usecase "View Patient Analysis History" as UC13
+  usecase "Monitor High-Risk Patients" as UC14
+  usecase "Add Medical Notes" as UC15
+  usecase "Chat with Patients" as UC16
+  
+  ' Admin Use Cases
+  usecase "Manage Users" as UC17
+  usecase "View System Statistics" as UC18
+  usecase "Manage Doctors" as UC19
+  usecase "Manage Patients" as UC20
+  usecase "View All Analyses" as UC21
+}
+
+' Patient relationships
+patient --> UC1
+patient --> UC2
+patient --> UC3
+patient --> UC4
+patient --> UC5
+patient --> UC6
+patient --> UC7
+patient --> UC8
+patient --> UC9
+patient --> UC10
+
+' Doctor relationships
+doctor --> UC1
+doctor --> UC2
+doctor --> UC11
+doctor --> UC12
+doctor --> UC13
+doctor --> UC14
+doctor --> UC15
+doctor --> UC16
+doctor --> UC9
+
+' Admin relationships
+admin --> UC1
+admin --> UC2
+admin --> UC17
+admin --> UC18
+admin --> UC19
+admin --> UC20
+admin --> UC21
+
+' Include relationships
+UC3 ..> UC4 : <<include>>
+UC4 ..> UC5 : <<include>>
+UC4 ..> UC6 : <<include>>
+
+@enduml

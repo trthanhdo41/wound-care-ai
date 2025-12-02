@@ -1,0 +1,77 @@
+@startuml Wound Care AI - Wound Analysis Sequence Diagram
+
+actor Patient
+participant "Frontend\n(React)" as Frontend
+participant "Backend\n(Flask)" as Backend
+participant "WoundAnalyzer" as Analyzer
+participant "SegFormer\nModel" as SegFormer
+participant "K-Means\nRisk Model" as RiskModel
+participant "K-Means\nColor Model" as ColorModel
+participant "Database" as DB
+
+Patient -> Frontend: Upload wound image
+activate Frontend
+
+Frontend -> Backend: POST /api/analysis/analyze\n(image file)
+activate Backend
+
+Backend -> Analyzer: analyze_wound(image)
+activate Analyzer
+
+' Image preprocessing
+Analyzer -> Analyzer: Preprocess image\n(resize, normalize)
+
+' Segmentation
+Analyzer -> SegFormer: segment_wound(image)
+activate SegFormer
+SegFormer -> SegFormer: Forward pass\nthrough model
+SegFormer --> Analyzer: segmentation_mask
+deactivate SegFormer
+
+' Grad-CAM generation
+Analyzer -> SegFormer: generate_gradcam(image)
+activate SegFormer
+SegFormer -> SegFormer: Calculate gradients\nand activations
+SegFormer --> Analyzer: gradcam_heatmap
+deactivate SegFormer
+
+' Calculate wound area
+Analyzer -> Analyzer: calculate_wound_area(mask)
+
+' Color classification
+Analyzer -> ColorModel: classify_colors(image, mask)
+activate ColorModel
+ColorModel -> ColorModel: Extract HSV features\nfrom wound region
+ColorModel -> ColorModel: Predict using\nK-Means clusters
+ColorModel --> Analyzer: tissue_percentages\n(Red, Yellow, Dark)
+deactivate ColorModel
+
+' Risk assessment
+Analyzer -> RiskModel: predict_risk(features)
+activate RiskModel
+RiskModel -> RiskModel: Prepare feature vector:\n- wound_area\n- tissue_percentages
+RiskModel -> RiskModel: Predict using\nK-Means clusters
+RiskModel --> Analyzer: risk_level, risk_score
+deactivate RiskModel
+
+' Generate care guidelines
+Analyzer -> Analyzer: generate_care_guidelines(\nrisk_level, tissue_composition)
+
+' Save results
+Analyzer --> Backend: analysis_results
+deactivate Analyzer
+
+Backend -> DB: Save WoundAnalysis record
+activate DB
+DB --> Backend: analysis_id
+deactivate DB
+
+Backend --> Frontend: JSON response:\n- segmentation_mask\n- gradcam\n- wound_area\n- tissue_composition\n- risk_assessment\n- care_guidelines
+deactivate Backend
+
+Frontend -> Frontend: Display results:\n- Segmentation overlay\n- Grad-CAM heatmap\n- Risk assessment card\n- Tissue composition chart\n- Care guidelines
+
+Frontend --> Patient: Show analysis results
+deactivate Frontend
+
+@enduml
